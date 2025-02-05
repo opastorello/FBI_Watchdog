@@ -19,7 +19,7 @@
 ### 🔍 Checking DNS
 | **DNS Checking** | **More DNS Checking** | **DNS Checking Finished** |
 |:---------------:|:-------------------:|:-----------------:|
-| ![DNS Checking](images/dns_checking.png) | ![DNS Checking](images/dns_checking.png) | ![DNS Check Complete](images/dns_checking_finished.png) |
+| ![DNS Checking](images/dns_checking.png) | ![DNS Checking](images/dns_checking1.png) | ![DNS Check Complete](images/dns_checking_finished.png) |
 | *Checking for DNS Record Changes* | *Checking for More DNS Changes* | *DNS Checking Completed* |
 
 ### ⚠️ Detecting DNS Changes & Seizure Capture
