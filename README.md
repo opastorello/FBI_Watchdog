@@ -66,7 +66,7 @@
 - :rocket: **Check For Updates** – Script will check for new updates on startup.
 - :rocket: **Seizure Detection Without NS Changes** – Detect LEA seizures using HTTP status codes, WHOIS changes, and/or SSL certificate logs.
 - :rocket: **Seizure Detections from Cloudflare NS** - LEA sometimes use Cloudflare NS when seizing domains.
-- :rocket: **Custom Domain List (`domains.txt`)** – Allow users to define monitored domains via a simple text file instead of hardcoding.
+- :rocket: **Custom Domain List and DNS Records File (`config.json`)** – Allow users to define monitored domains, and records into a config file instead of hardcoding.
 - :rocket: **Randomized User-Agent for Selenium** – Implement a rotating User-Agent to bypass bot detection and avoid fingerprinting.
 - :rocket: **Onion Site Monitoring** – Add `.onion` support for hidden services.
 - :rocket: **Faster Checks with AsyncIO or Threading** – Improve DNS monitoring speed by using asyncio (aiodns) or threading for parallel lookups, reducing scan times and improving efficiency.
