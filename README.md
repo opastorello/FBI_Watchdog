@@ -6,7 +6,7 @@
   <img src="images/FBI_Watchdog.png" alt="FBI Watchdog" width="600">
 </p>
 
-✅ FBI Watchdog is clean! No detections on VirusTotal. Check the latest scan report here: [VirusTotal Report](https://www.virustotal.com/gui/file/9ff54ff7991a20e4d5e74f31c3d4b20482fdac16f3cf243c51126e7bf616d0c6)
+✅ FBI Watchdog is clean! No detections on VirusTotal. Check the latest scan report here: [VirusTotal Report](https://www.virustotal.com/gui/file/87466e912dcf3b3439c02bf6208703def32e864cd2bcecd47763277193f2241f)
 
 🚨 **Live in Action**: FBI Watchdog is actively monitoring domains on **my Telegram channel**: [TheDarkWebInformer](https://t.me/TheDarkWebInformer).  
 
