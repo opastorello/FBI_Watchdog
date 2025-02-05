@@ -168,7 +168,13 @@ Your support helps keep **FBI Watchdog** and **Dark Web Informer** independent a
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=DarkWebInformer/FBI_Watchdog&type=Date)](https://star-history.com/#DarkWebInformer/FBI_Watchdog&Date)
+<a href="https://star-history.com/#DarkWebInformer/FBI_Watchdog&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=DarkWebInformer/FBI_Watchdog&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=DarkWebInformer/FBI_Watchdog&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=DarkWebInformer/FBI_Watchdog&type=Date" />
+ </picture>
+</a>
 
 ## 📝 License
 
