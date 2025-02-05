@@ -1,6 +1,6 @@
 # FBI Watchdog
 
-:shield: FBI Watchdog is a cyber threat intelligence tool that monitors domain DNS changes in real-time, specifically detecting law enforcement seizures (`ns1.fbi.seized.gov` and `ns2.fbi.seized.gov`). It alerts users via Telegram and Discord and captures screenshots of seized domains.
+:shield: FBI Watchdog is a cyber threat intelligence OSINT tool that monitors domain DNS changes in real-time, specifically detecting law enforcement seizures (`ns1.fbi.seized.gov` and `ns2.fbi.seized.gov`). It alerts users via Telegram and Discord and captures screenshots of seized domains.
 
 <p align="center">
   <img src="images/FBI_Watchdog.png" alt="FBI Watchdog" width="600">
@@ -168,7 +168,7 @@ Your support helps keep **FBI Watchdog** and **Dark Web Informer** independent a
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=DarkWebInformer/FBI_Watchdog&type=Date)](https://star-history.com/#DarkWebInformer/FBI_Watchdog&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=DarkWebInformer/FBI-Watchdog&type=Date)](https://star-history.com/#DarkWebInformer/FBI-Watchdog&Date)
 
 ## 📝 License
 
