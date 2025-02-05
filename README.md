@@ -48,7 +48,7 @@
 - :white_check_mark: **Telegram & Discord Alerts** – Sends detailed notifications when a DNS change occurs or a domain is seized.
 - :white_check_mark: **Screenshot Capture** – Uses **Selenium** to take snapshots of affected sites.
 - :white_check_mark: **Rich CLI Output** – Uses **`rich`** for colored logs and better visibility.
-- :white_check_mark: **Auto-Saves DNS History** – Stores previous DNS states in `seizure_results.json`.
+- :white_check_mark: **Auto-Saves DNS History** – Stores previous DNS states in `fbi_watchdog_results.json`.
 - :white_check_mark: **Cross-Platform** – Works on **Windows, Linux, and macOS**.
 
 ---
