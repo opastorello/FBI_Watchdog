@@ -44,7 +44,7 @@
 
 ## :pushpin: Features
 - :white_check_mark: **Real-time DNS Monitoring** – Detects changes in `A`, `AAAA`, `CNAME`, `MX`, `NS`, `SOA`, and `TXT` records.
-- :white_check_mark: **Seizure Detection** – Identifies law enforcement takeovers (`ns1.fbi.seized.gov and ns2.fbi.seized.gov`).
+- :white_check_mark: **Seizure Detection** – Identifies law enforcement takeovers (`ns1.fbi.seized.gov, ns2.fbi.seized.gov, jocelyn.ns.cloudflare.com, and plato.ns.cloudflare.com`).
 - :white_check_mark: **Telegram & Discord Alerts** – Sends detailed notifications when a DNS change occurs or a domain is seized.
 - :white_check_mark: **Screenshot Capture** – Uses **Selenium** to take snapshots of affected sites.
 - :white_check_mark: **Rich CLI Output** – Uses **`rich`** for colored logs and better visibility.
@@ -65,7 +65,6 @@
 - :rocket: **Database Support** – Store DNS history in **SQLite or PostgreSQL** instead of JSON.
 - :rocket: **Check For Updates** – Script will check for new updates on startup.
 - :rocket: **Seizure Detection Without NS Changes** – Detect LEA seizures using HTTP status codes, WHOIS changes, and/or SSL certificate logs.
-- :rocket: **Seizure Detections from Cloudflare NS** - LEA sometimes use Cloudflare NS when seizing domains.
 - :rocket: **Custom Domain List and DNS Records File (`config.json`)** – Allow users to define monitored domains, and records into a config file instead of hardcoding.
 - :rocket: **Randomized User-Agent for Selenium** – Implement a rotating User-Agent to bypass bot detection and avoid fingerprinting.
 - :rocket: **Onion Site Monitoring** – Add `.onion` support for hidden services.
