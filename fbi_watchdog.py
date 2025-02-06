@@ -38,7 +38,7 @@ ascii_banner = r"""
      _,-' ,'`-__; '--.
     (_/'~~      ''''(;                                                    
 
-[bold blue]FBI Watchdog v1.0 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
+[bold blue]FBI Watchdog v1.0.1 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
 """
 
 console.print(Padding(f"[bold blue]{ascii_banner}[/bold blue]", (0, 0, 0, 4)))
@@ -271,7 +271,7 @@ def watch_dog():
                         console.print("")
 
                         seizure_capture = None
-                        if record_type == "NS" and any(ns in sorted_records for ns in ["ns1.fbi.seized.gov.", "ns2.fbi.seized.gov."]):
+                        if record_type == "NS" and any(ns in sorted_records for ns in ["ns1.fbi.seized.gov.", "ns2.fbi.seized.gov.", "jocelyn.ns.cloudflare.com.", "plato.ns.cloudflare.com."]):
                             console.print(Padding(f"→ Taking seizure screenshot for {domain} (FBI Seized NS Detected)", (0, 0, 0, 4)))
                             seizure_capture = capture_seizure_image(domain)
 
