@@ -37,16 +37,19 @@ def watchdog_update():
         )
 
         if not diff_result.stdout:
+            console.print("")
             console.print(Padding("[bold green]→ No updates found. Running the script normally...[/bold green]", (0, 0, 0, 4)))
             return
 
         # Show changes before updating
+        console.print("")
         console.print(Padding("[bold yellow]→ Updates are available! Here are the changes:[/bold yellow]", (0, 0, 0, 4)))
         console.print(Padding(diff_result.stdout, (0, 0, 0, 4)))
 
         # Confirm first
         user_input = input("\n[?] Apply these updates? (y/n): ").strip().lower()
         if user_input != "y":
+            console.print("")
             console.print(Padding("[bold cyan]→ Update skipped. Running the current version.[/bold cyan]", (0, 0, 0, 4)))
             return
 
@@ -56,6 +59,7 @@ def watchdog_update():
             capture_output=True, text=True
         )
 
+        console.print("")
         console.print(Padding("[bold yellow]→ Update applied! Restarting script in 3 seconds...[/bold yellow]", (0, 0, 0, 4)))
         time.sleep(3)
 
@@ -64,6 +68,7 @@ def watchdog_update():
         sys.exit(0)
 
     except Exception as e:
+        console.print("")
         console.print(Padding(f"[bold red]→ Couldn't update from GitHub. Error: {e}[/bold red]", (0, 0, 0, 4)))
 
 # Run auto-update first
@@ -92,7 +97,7 @@ ascii_banner = r"""
      _,-' ,'`-__; '--.
     (_/'~~      ''''(;                                                    
 
-[bold blue]FBI Watchdog v1.1 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
+[bold blue]FBI Watchdog v1.0.1 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
 """
 
 console.print(Padding(f"[bold blue]{ascii_banner}[/bold blue]", (0, 0, 0, 4)))
