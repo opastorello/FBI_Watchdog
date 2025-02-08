@@ -104,7 +104,7 @@ ascii_banner = r"""
      _,-' ,'`-__; '--.
     (_/'~~      ''''(;                                                    
 
-[bold blue]FBI Watchdog v1.1.1 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
+[bold blue]FBI Watchdog v1.1.2 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
 """
 
 console.print(Padding(f"[bold blue]{ascii_banner}[/bold blue]", (0, 0, 0, 4)))
@@ -351,7 +351,7 @@ def watch_dog():
                 save_previous_results()
                 console.print(Padding("[bold green]→ FBI Watchdog shift complete. Snoozing for 60 seconds...[/bold green]\n", (0, 0, 0, 4)))
                 interval = 60
-                time.sleep(interval) # Snooze before the next shift
+                time.sleep(interval) # Snooze before next shift
                 
     except KeyboardInterrupt:
         exit_flag = True
