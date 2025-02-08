@@ -75,9 +75,16 @@ def watchdog_update():
 watchdog_update()
 
 def clear_screen():
-    time.sleep(3)
-    """ Clears the terminal screen before output """
-    os.system("cls" if os.name == "nt" else "clear")
+    try:
+        time.sleep(3)
+        if sys.platform == "win32":
+            os.system("cls")
+        else:
+            os.system("clear")
+    except KeyboardInterrupt:
+        console.print("")
+        console.print(Padding("[bold red]\n[!] Script interrupted by user. Exiting cleanly...[/bold red]", (0, 0, 0, 4)))
+        sys.exit(0)
 
 load_dotenv()
 
