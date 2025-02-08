@@ -50,6 +50,7 @@
 - :white_check_mark: **Rich CLI Output** – Uses **`rich`** for colored logs and better visibility.
 - :white_check_mark: **Auto-Saves DNS History** – Stores previous DNS states in `fbi_watchdog_results.json`.
 - :white_check_mark: **Cross-Platform** – Works on **Windows, Linux, and macOS**.
+- :white_check_mark: **Check For Updates** – Script will check for new updates on startup.
 
 ---
 
@@ -63,7 +64,6 @@
 ## :rocket: Future Features
 - :rocket: **Multi-Platform Notifications** – Add support for **Slack & Email alerts**.
 - :rocket: **Database Support** – Store DNS history in **SQLite or PostgreSQL** instead of JSON.
-- :rocket: **Check For Updates** – Script will check for new updates on startup.
 - :rocket: **Seizure Detection Without NS Changes** – Detect LEA seizures using HTTP status codes, WHOIS changes, and/or SSL certificate logs.
 - :rocket: **Custom Domain List and DNS Records File (`config.json`)** – Allow users to define monitored domains, and records into a config file instead of hardcoding.
 - :rocket: **Randomized User-Agent for Selenium** – Implement a rotating User-Agent to bypass bot detection and avoid fingerprinting.
