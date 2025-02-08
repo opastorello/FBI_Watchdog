@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 import time
 import json
 import signal
@@ -14,15 +15,68 @@ from webdriver_manager.chrome import ChromeDriverManager
 from rich.console import Console
 from rich.padding import Padding
 
+console = Console()
+
+def watchdog_update():
+    """Checks for updates from GitHub and asks for confirmation before applying."""
+    repo_dir = os.path.dirname(os.path.abspath(__file__))
+    python_executable = sys.executable
+    script_path = os.path.abspath(__file__)
+
+    try:
+        # Return changes from remote without applying them yet
+        subprocess.run(
+            ["git", "-C", repo_dir, "fetch", "origin", "main"],
+            capture_output=True, text=True
+        )
+
+        # Check if updates are available
+        diff_result = subprocess.run(
+            ["git", "-C", repo_dir, "diff", "HEAD..origin/main"],
+            capture_output=True, text=True
+        )
+
+        if not diff_result.stdout:
+            console.print(Padding("[bold green]→ No updates found. Running the script normally...[/bold green]", (0, 0, 0, 4)))
+            return
+
+        # Show changes before updating
+        console.print(Padding("[bold yellow]→ Updates are available! Here are the changes:[/bold yellow]", (0, 0, 0, 4)))
+        console.print(Padding(diff_result.stdout, (0, 0, 0, 4)))
+
+        # Confirm first
+        user_input = input("\n[?] Apply these updates? (y/n): ").strip().lower()
+        if user_input != "y":
+            console.print(Padding("[bold cyan]→ Update skipped. Running the current version.[/bold cyan]", (0, 0, 0, 4)))
+            return
+
+        # Apply the update
+        update_result = subprocess.run(
+            ["git", "-C", repo_dir, "pull", "origin", "main"],
+            capture_output=True, text=True
+        )
+
+        console.print(Padding("[bold yellow]→ Update applied! Restarting script in 3 seconds...[/bold yellow]", (0, 0, 0, 4)))
+        time.sleep(3)
+
+        # Restart the script
+        subprocess.Popen([python_executable, script_path] + sys.argv[1:])
+        sys.exit(0)
+
+    except Exception as e:
+        console.print(Padding(f"[bold red]→ Couldn't update from GitHub. Error: {e}[/bold red]", (0, 0, 0, 4)))
+
+# Run auto-update first
+watchdog_update()
+
 def clear_screen():
+    time.sleep(3)
     """ Clears the terminal screen before output """
     os.system("cls" if os.name == "nt" else "clear")
 
 load_dotenv()
 
 clear_screen()
-
-console = Console()
 
 ascii_banner = r"""
  ______ ____ _____  __          __   _       _         _             
@@ -43,7 +97,7 @@ ascii_banner = r"""
 
 console.print(Padding(f"[bold blue]{ascii_banner}[/bold blue]", (0, 0, 0, 4)))
 
-# Domain listt to monitor for seizure banners and DNS changes
+# Domain list to monitor for seizure banners and DNS changes
 domains = ["example.com", "example1.com", "example2.com"]
 
 # DNS records that will be checked for changes
