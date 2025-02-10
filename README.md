@@ -50,7 +50,7 @@
 - :white_check_mark: **Rich CLI Output** – Uses **`rich`** for colored logs and better visibility.
 - :white_check_mark: **Auto-Saves DNS History** – Stores previous DNS states in `fbi_watchdog_results.json`.
 - :white_check_mark: **Cross-Platform** – Works on **Windows, Linux, and macOS**.
-- :white_check_mark: **Check For Updates** – Script will check for new updates on startup.
+- :white_check_mark: **Check For Updates** – Script will check for new updates on startup. If new updates are found, you will be able to review the code and approve the update or decline the update and use the current version.
 
 ---
 
