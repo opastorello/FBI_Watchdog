@@ -3,10 +3,10 @@
 :shield: FBI Watchdog is a cyber threat intelligence OSINT tool that monitors domain DNS changes in real-time, specifically detecting law enforcement seizures (`ns1.fbi.seized.gov` and `ns2.fbi.seized.gov`). It alerts users via Telegram and Discord and captures screenshots of seized domains.
 
 <p align="center">
-  <img src="images/FBI_Watchdog.png" alt="FBI Watchdog" width="600">
+  <img src="images/FBI_Watchdog2.png" alt="FBI Watchdog" width="600">
 </p>
 
-✅ FBI Watchdog is clean! No detections on VirusTotal. Check the latest scan report here (v1.1.3): [VirusTotal Report](https://www.virustotal.com/gui/file/177d53971dcfc58bbee4c389da14c59e5dbd720243679a2d849e09ca99820038)
+✅ FBI Watchdog is clean! No detections on VirusTotal. Check the latest scan report here (v2.0): [VirusTotal Report](https://www.virustotal.com/gui/file/636c60ce1f489d6fa6a08f0409107ab31f4fff6d8cef4864d37fa13eaa4bfd85)
 
 🚨 **Live in Action**: FBI Watchdog is actively monitoring domains on **my Telegram channel**: [TheDarkWebInformer](https://t.me/TheDarkWebInformer).  
 
