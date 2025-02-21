@@ -5,13 +5,17 @@ import time
 import json
 import signal
 import random
+import socks
+import socket
 from datetime import datetime, timezone
 import dns.resolver
 import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from webdriver_manager.firefox import GeckoDriverManager
 from rich.console import Console
 from rich.padding import Padding
 
@@ -104,13 +108,20 @@ ascii_banner = r"""
      _,-' ,'`-__; '--.
     (_/'~~      ''''(;                                                    
 
-[bold blue]FBI Watchdog v1.1.3 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
+[bold blue]FBI Watchdog v2.0 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
 """
 
 console.print(Padding(f"[bold blue]{ascii_banner}[/bold blue]", (0, 0, 0, 4)))
 
 # Domain list to monitor for seizure banners and DNS changes
-domains = ["example.com", "example1.com", "example2.com"]
+
+domains = [
+    "example.com," "example1.com," "example2.com"
+]
+
+onion_sites = [
+     "dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion", "breached26tezcofqla4adzyn22notfqwcac7gpbrleg4usehljwkgqd.onion",
+]
 
 # DNS records that will be checked for changes
 dnsRecords = ["A", "AAAA", "CNAME", "MX", "NS", "SOA", "TXT"]
@@ -127,6 +138,36 @@ if not webhook_url or not alert_bot_token or not alert_chat_id:
 # File to store previous DNS results
 state_file = "fbi_watchdog_results.json"
 previous_results = {}
+
+def send_request(url, data=None, use_tor=False):
+    """Send a request using Tor only for .onion sites, normal internet uses direct connection."""
+    
+    # ✅ Default: No proxy (use normal internet)
+    proxies = None  
+
+    # ✅ Use Tor proxy ONLY for .onion sites
+    if use_tor:
+        proxies = {
+            "http": "socks5h://127.0.0.1:9050",
+            "https": "socks5h://127.0.0.1:9050"
+        }
+
+    try:
+        if data:
+            response = requests.post(url, json=data, proxies=proxies, timeout=15)
+        else:
+            response = requests.get(url, proxies=proxies, timeout=15)
+
+        response.raise_for_status()
+        return response.text
+
+    except requests.exceptions.ProxyError:
+        console.print(Padding(f"[red]→ Proxy Error! Check if you're trying to route normal traffic through Tor.[/red]", (0, 0, 0, 4)))
+        return None
+
+    except requests.exceptions.RequestException as e:
+        console.print(Padding(f"[red]→ Request failed: {e}[/red]", (0, 0, 0, 4)))
+        return None
 
 # Send Telegram notification for DNS changes or seizure detection
 def telegram_notify(domain, record_type, records, previous_records, seizure_capture=None):
@@ -148,24 +189,18 @@ def telegram_notify(domain, record_type, records, previous_records, seizure_capt
         f"*New Records:*\n```\n{new_records_formatted}\n```"
     )
 
-    payload = {
-        "chat_id": alert_chat_id,
-        "text": message,
-        "parse_mode": "Markdown"
-    }
+    send_request(f"https://api.telegram.org/bot{alert_bot_token}/sendMessage", 
+                 data={"chat_id": alert_chat_id, "text": message, "parse_mode": "Markdown"},
+                 use_tor=False)
 
-    response = requests.post(f"https://api.telegram.org/bot{alert_bot_token}/sendMessage", data=payload)
-
-    if response.status_code != 200:
-        console.print(Padding(f"→ Telegram API Error: {response.status_code}", (0, 0, 0, 4)))
-
+    # ✅ Send Screenshot if Available
     if seizure_capture and os.path.exists(seizure_capture):
-        with open(seizure_capture, "rb") as photo:
-            requests.post(
-                f"https://api.telegram.org/bot{alert_bot_token}/sendPhoto",
-                data={"chat_id": alert_chat_id, "caption": message, "parse_mode": "Markdown"},
-                files={"photo": photo}
-            )
+        console.print(Padding(f"→ Sending seizure image to Telegram for {domain}...", (0, 0, 0, 4)))
+        with open(seizure_capture, 'rb') as photo:
+            files = {"photo": photo}
+            requests.post(f"https://api.telegram.org/bot{alert_bot_token}/sendPhoto",
+                          data={"chat_id": alert_chat_id}, files=files)
+
 
 # Send Discord notification for DNS changes or seizure detection
 def discord_notify(domain, recordType, dnsRecords, prevEntry, screenshotPath=None):
@@ -188,51 +223,76 @@ def discord_notify(domain, recordType, dnsRecords, prevEntry, screenshotPath=Non
             }
         ]
     }
-    response = requests.post(webhook_url, json=embed_data)
 
+    send_request(webhook_url, data=embed_data, use_tor=False)
+
+    # ✅ Send Screenshot if Available
     if screenshotPath and os.path.exists(screenshotPath):
-        with open(screenshotPath, "rb") as image:
-            requests.post(webhook_url, files={"file": image})
+        console.print(Padding(f"→ Sending seizure image to Discord for {domain}...", (0, 0, 0, 4)))
+        with open(screenshotPath, 'rb') as file:
+            requests.post(webhook_url, files={"file": file})
 
-def capture_seizure_image(domain):
+
+def capture_seizure_image(domain, use_tor=False):
+    """Capture a screenshot of a suspected seizure page using Firefox.
+    
+    - Uses **Tor (Firefox proxy settings)** for `.onion` sites.
+    - Uses **Direct connection** for clearnet sites.
+    """
+    
     screenshot_filename = f"screenshots/{domain}_image.png"
     os.makedirs("screenshots", exist_ok=True)
 
-    try:
-        console.print(Padding(f"→ Capturing likely LEA seizure {domain}...", (0, 0, 0, 4)))
+    console.print(Padding(f"→ Capturing likely LEA seizure {domain}...", (0, 0, 0, 4)))
 
-        options = webdriver.ChromeOptions()
+    try:
+        options = FirefoxOptions()
         options.add_argument("--headless")
-        options.add_argument("--window-size=2560,1440") # 1440p resolution because WOOF. Change this to 1920,1080 if you want
+        options.add_argument("--window-size=2560,1440")  
         options.add_argument("--ignore-certificate-errors")
         options.add_argument("--disable-web-security")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        
+        # Automatically detect OS and set Firefox binary location
+        if platform.system() == "Windows":
+            options.binary_location = "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+        elif platform.system() == "Linux":
+            options.binary_location = "/usr/bin/firefox"
+        elif platform.system() == "Darwin":  # macOS
+            options.binary_location = "/Applications/Firefox.app/Contents/MacOS/firefox"
+        else:
+            raise Exception("Unsupported operating system: Cannot determine Firefox binary path.")
 
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
+        if use_tor:
+            console.print(Padding(f"→ Routing traffic through Tor for {domain}...", (0, 0, 0, 4)))
+
+            options.set_preference("network.proxy.type", 1)
+            options.set_preference("network.proxy.socks", "127.0.0.1")
+            options.set_preference("network.proxy.socks_port", 9050)
+            options.set_preference("network.proxy.socks_remote_dns", True)  # 🛠 Ensures Tor resolves .onion domains
+            options.set_preference("network.http.referer.spoofSource", True)
+            options.set_preference("privacy.resistFingerprinting", True)
+            options.set_preference("network.dns.disableIPv6", True)  # 🔴 Prevents DNS leaks
+
+        # ✅ Automatically download & update Geckodriver
+        service = FirefoxService(GeckoDriverManager().install())  # Automatically finds & installs Geckodriver
+        driver = webdriver.Firefox(service=service, options=options)
 
         try:
-            driver.get(f"http://{domain}")  # Try HTTP first
-            time.sleep(3)
-        except Exception:
-            console.print(Padding(f"→ HTTP failed, switching to HTTPS... {domain}...", (0, 0, 0, 4)))
-            try:
-                driver.get(f"https://{domain}")
-                time.sleep(3)
-            except Exception as e:
-                error_message = str(e)
-                if "ERR_SSL_VERSION_OR_CIPHER_MISMATCH" in error_message:
-                    console.print(Padding(f"→ SSL error on {domain}: Cipher mismatch, skipping screenshot.", (0, 0, 0, 4)))
-                elif "ERR_NAME_NOT_RESOLVED" in error_message:
-                    console.print(Padding(f"→ Domain {domain} does not exist or is offline. Skipping screenshot.", (0, 0, 0, 4)))
-                else:
-                    console.print(Padding(f"→ Failed to access {domain}: {error_message}", (0, 0, 0, 4)))
+            url = f"http://{domain}" if not domain.startswith("http") else domain
+            console.print(Padding(f"→ Attempting to load {url} via Selenium...", (0, 0, 0, 4)))
 
-                driver.save_screenshot(screenshot_filename)
-                console.print(Padding(f"→ Saved error page screenshot for {domain}: {screenshot_filename}", (0, 0, 0, 4)))
-                driver.quit()
-                return screenshot_filename
+            driver.get(url)
+            time.sleep(10)  # Wait for page to fully load
+
+            # ✅ Print the page title for debugging
+            console.print(Padding(f"→ Page Title: {driver.title}", (0, 0, 0, 4)))
+
+        except Exception as e:
+            console.print(Padding(f"→ Failed to access {domain}: {e}", (0, 0, 0, 4)))
+            driver.quit()
+            return None
 
         driver.save_screenshot(screenshot_filename)
         driver.quit()
@@ -242,6 +302,33 @@ def capture_seizure_image(domain):
     except Exception as e:
         console.print(Padding(f"→ Unable to save seizure screenshot. {domain}: {e}", (0, 0, 0, 4)))
         return None
+
+onion_state_file = "onion_watchdog_results.json"
+onion_results = {}  # Store `.onion` site statuses separately
+
+def load_onion_results():
+    """Load previous onion site results from a separate file at script startup."""
+    global onion_results
+    try:
+        if os.path.exists(onion_state_file):
+            with open(onion_state_file, "r", encoding="utf-8") as file:
+                onion_results = json.load(file)
+            console.print(Padding(f"[bold green]→ Loaded previous onion scan results.[/bold green]", (0, 0, 0, 4)))
+        else:
+            onion_results = {}
+            console.print(Padding(f"[bold yellow]→ No previous onion scan results found, starting fresh.[/bold yellow]", (0, 0, 0, 4)))
+    except Exception as e:
+        console.print(Padding(f"[red]→ Error loading onion results: {e}[/red]", (0, 0, 0, 4)))
+        onion_results = {}
+
+def save_onion_results():
+    """Save onion site results to a separate file to ensure persistence."""
+    try:
+        with open(onion_state_file, "w", encoding="utf-8") as file:
+            json.dump(onion_results, file, indent=4, ensure_ascii=False)
+        console.print(Padding(f"[bold green]→ Onion scan results saved successfully.[/bold green]", (0, 0, 0, 4)))
+    except Exception as e:
+        console.print(Padding(f"[red]→ Error saving onion results: {e}[/red]", (0, 0, 0, 4)))
 
 def load_previous_results():
     global previous_results
@@ -262,7 +349,6 @@ def save_previous_results():
     try:
         with open(state_file, "w", encoding="utf-8") as file:
             json.dump(previous_results, file, indent=4, ensure_ascii=False)
-        console.print("")
         console.print(Padding(f"[bold green]→ All results have been successfully saved.[/bold green]", (0, 0, 0, 4)))
     except Exception as e:
         console.print("")
@@ -286,6 +372,129 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+tor_status = True  # Global variable to store Tor connection status
+
+def is_tor_running():
+    """Checks if Tor is running and correctly routing traffic."""
+    global tor_status
+
+    # ✅ If tor_status is already True, don't check again
+    if tor_status:
+        return True  
+
+    tor_ports = [9050, 9150]  # Check both common Tor ports
+
+    for tor_port in tor_ports:
+        try:
+            socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", tor_port)
+            socket.socket = socks.socksocket  # Redirect all sockets through Tor
+
+            # ✅ First check: Try HTTPS version of Tor check page
+            proxies = {"http": f"socks5h://127.0.0.1:{tor_port}", "https": f"socks5h://127.0.0.1:{tor_port}"}
+            response = requests.get("https://check.torproject.org/", proxies=proxies, timeout=10)
+
+            # ✅ Parse HTML to extract text properly
+            soup = BeautifulSoup(response.text, "html.parser")
+            if soup.find("h1", class_="not") and "Congratulations" in soup.find("h1", class_="not").text:
+                tor_status = True
+                console.print("")
+                console.print(Padding(f"[bold green]→ Tor is running and routing traffic on port {tor_port}![/bold green]", (0, 0, 0, 4)))
+                console.print("")
+                return True
+                
+        except requests.exceptions.RequestException:
+            console.print(Padding(f"[yellow]→ Tor check failed on port {tor_port}. Trying next port...[/yellow]", (0, 0, 0, 4)))
+            continue  # Try the next port
+
+    # ❌ If both checks fail, mark Tor as unavailable and log it
+    tor_status = False
+    console.print("")
+    console.print(Padding("[bold red]→ Tor is NOT running or misconfigured! Skipping .onion scans.[/bold red]", (0, 0, 0, 4)))
+    console.print("")
+    return False
+
+def check_onion_status(onion_url):
+    """Check if a .onion site is seized by scanning for known seizure text in HTML."""
+    global onion_results
+
+    if not is_tor_running():  
+        console.print(Padding(f"[red]→ Skipping {onion_url}: Tor is not running![/red]", (0, 0, 0, 4)))
+        return False
+
+    tor_proxy = "socks5h://127.0.0.1:9050"
+    proxies = {"http": tor_proxy, "https": tor_proxy}
+
+    last_status = onion_results.get(onion_url, {}).get("status", "unknown")
+
+    try:
+        response = requests.get(f"http://{onion_url}", proxies=proxies, timeout=30)  # Increased timeout
+        html_content = response.text.lower()
+
+        seizure_keywords = [
+            "this hidden site has been seized", "fbi", "seized by", "department of justice",
+            "europol", "nca", "interpol", "law enforcement", "this domain has been seized"
+        ]
+
+        is_seized = any(keyword in html_content for keyword in seizure_keywords)
+        new_status = "seized" if is_seized else "active"
+
+        if last_status == new_status:
+            console.print(Padding(f"[cyan]→ No change detected for {onion_url}, skipping.[/cyan]", (0, 0, 0, 4)))
+            return False
+
+        if is_seized:
+            console.print(Padding(f"[bold red]→ Seizure detected: {onion_url}[/bold red]", (0, 0, 0, 4)))
+            seizure_capture = capture_seizure_image(onion_url, use_tor=True)
+
+            onion_results[onion_url] = {"status": "seized", "last_checked": datetime.now(timezone.utc).isoformat()}
+            save_onion_results()
+
+            telegram_notify(onion_url, "Onion Seized", ["Seized"], ["Online"], seizure_capture)
+            discord_notify(onion_url, "Onion Seized", ["Seized"], ["Online"], seizure_capture)
+
+        else:
+            console.print(Padding(f"[green]→ {onion_url} is active[/green]", (0, 0, 0, 4)))
+            onion_results[onion_url] = {"status": "active", "last_checked": datetime.now(timezone.utc).isoformat()}
+            save_onion_results()
+
+        return is_seized
+
+    except requests.exceptions.ConnectionError:
+        console.print(Padding(f"[yellow]→ {onion_url} is unreachable. Connection refused.[/yellow]", (0, 0, 0, 4)))
+        new_status = "unreachable"
+    except requests.exceptions.Timeout:
+        console.print(Padding(f"[yellow]→ {onion_url} timed out. Likely offline or slow.[/yellow]", (0, 0, 0, 4)))
+        new_status = "unreachable"
+    except requests.exceptions.RequestException as e:
+        console.print(Padding(f"[yellow]→ {onion_url} is unreachable. Error: {e}[/yellow]", (0, 0, 0, 4)))
+        new_status = "unreachable"
+
+    if last_status == new_status:
+        console.print(Padding(f"[cyan]→ No change detected for {onion_url}, skipping.[/cyan]", (0, 0, 0, 4)))
+        return False
+
+    onion_results[onion_url] = {"status": new_status, "last_checked": datetime.now(timezone.utc).isoformat()}
+    save_onion_results()
+
+    return False
+
+def check_all_onion_sites():
+    """Iterate through all .onion sites and check their status using a single Tor check."""
+    global tor_status
+
+    if not is_tor_running():
+        console.print(Padding("[bold red]→ Skipping all .onion scans: Tor is not running![/bold red]", (0, 0, 0, 4)))
+        return
+
+    for onion_site in onion_sites:
+        check_onion_status(onion_site)
+
+    # ✅ Save results after all `.onion` sites are scanned
+    save_onion_results()
+
+    console.print(Padding("[bold green]→ Onion scan complete. Snoozing for 60 seconds...[/bold green]\n", (0, 0, 0, 4)))
+
+
 # Monitor domains for DNS changes and possible seizures and send alerts when needed
 def watch_dog():
     global exit_flag
@@ -301,7 +510,7 @@ def watch_dog():
                     if exit_flag:
                         break
                     console.print(Padding(f"[bold cyan]→ Scanning {record_type:<5} records for {domain[:25]:<25}[/bold cyan]", (0, 0, 0, 4)))
-                    
+
                     # Check the DNS records for the current domain
                     try:
                         answers = dns.resolver.resolve(domain, record_type, lifetime=5)
@@ -316,6 +525,11 @@ def watch_dog():
 
                     sorted_records = sorted(records)
                     prev_entry = previous_results.get(domain, {}).get(record_type, {"records": []})
+
+                    # Ensure prev_entry is a dictionary before accessing keys
+                    if not isinstance(prev_entry, dict):
+                        prev_entry = {"records": []}  # Reset to an empty dictionary if it's not
+
                     prev_sorted_records = sorted(prev_entry["records"])
 
                     if domain not in previous_results:
@@ -347,18 +561,24 @@ def watch_dog():
                 # Add a delay between domains
                 time.sleep(random.uniform(3, 6))
 
+            # Ensure Tor is running before checking .onion sites
+            if is_tor_running():
+                console.print("")
+                console.print(Padding(f"→ Configuring Firefox to route traffic through Tor...", (0, 0, 0, 4)))
+                console.print(Padding("[bold cyan]→ Checking .onion sites for seizures...[/bold cyan]", (0, 0, 0, 4)))
+                console.print("")
+
+                for onion_site in onion_sites:
+                    check_onion_status(onion_site)
+
+                console.print("")
+                console.print(Padding("[bold green]→ Onion scan complete. Snoozing for 60 seconds...[/bold green]\n", (0, 0, 0, 4)))
+
+            # ✅ Save results after both DNS and .onion scans
             if not exit_flag:
                 save_previous_results()
                 console.print(Padding("[bold green]→ FBI Watchdog shift complete. Snoozing for 60 seconds...[/bold green]\n", (0, 0, 0, 4)))
-                interval = 60
-                time.sleep(interval) # Snooze before next shift
-                
-    except KeyboardInterrupt:
-        exit_flag = True
-        console.print(Padding("[bold red]→ Monitoring interrupted by user. Exiting...[/bold red]", (0, 0, 0, 4)))
-        save_previous_results()
-        console.print(Padding("[bold green]→ FBI Watchdog Results saved successfully.[/bold green]", (0, 0, 0, 4)))
-        exit(0)
+                time.sleep(60)  # Snooze before next shift
 
     except KeyboardInterrupt:
         exit_flag = True
@@ -368,7 +588,8 @@ def watch_dog():
         exit(0)
 
 if __name__ == "__main__":
-    load_previous_results()
+    load_previous_results()  # ✅ Loads clearnet sites
+    load_onion_results()  # ✅ Loads onion sites
 
     console.print(Padding("[bold cyan]→ Loading previous FBI Watchdog results...[/bold cyan]", (0, 0, 0, 4)))
     time.sleep(random.uniform(0.5, 1.2))
@@ -378,4 +599,5 @@ if __name__ == "__main__":
 
     console.print(Padding("[bold yellow]→ FBI Watchdog is starting to sniff for seizure records...[/bold yellow]\n", (0, 0, 0, 4)))
     time.sleep(random.uniform(1.5, 2.5))
+
     watch_dog()
