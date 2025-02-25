@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.1] - 2025-02-25
+### Added
+- Added import platform to reduce false positive seizure notifications on initial check.
+
+---
+
 ## [2.0.0] - 2025-02-21
 
 ### Major Changes
