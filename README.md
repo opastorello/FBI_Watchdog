@@ -51,6 +51,7 @@
 - :white_check_mark: **Auto-Saves DNS History** – Stores previous DNS states in `fbi_watchdog_results.json`.
 - :white_check_mark: **Cross-Platform** – Works on **Windows, Linux, and macOS**.
 - :white_check_mark: **Check For Updates** – Script will check for new updates on startup. If new updates are found, you will be able to review the code and approve the update or decline the update and use the current version.
+- :white_check_mark: **Onion Site Monitoring** – Monitors `.onion` support for hidden services.
 
 ---
 
@@ -67,14 +68,13 @@
 - :rocket: **Seizure Detection Without NS Changes** – Detect LEA seizures using HTTP status codes, WHOIS changes, and/or SSL certificate logs.
 - :rocket: **Custom Domain List and DNS Records File (`config.json`)** – Allow users to define monitored domains, and records into a config file instead of hardcoding.
 - :rocket: **Randomized User-Agent for Selenium** – Implement a rotating User-Agent to bypass bot detection and avoid fingerprinting.
-- :rocket: **Onion Site Monitoring** – Add `.onion` support for hidden services.
 - :rocket: **Faster Checks with AsyncIO or Threading** – Improve DNS monitoring speed by using asyncio (aiodns) or threading for parallel lookups, reducing scan times and improving efficiency.
 
 ---
 
 ### 💻 System Requirements:
 - 🐍 **Python 3.x** (Latest version preferred, minimum recommended: Python 3.8)
-- 🖥️ **Google Chrome installed** (For Selenium screenshots)
+- 🖥️ **Firefox installed** (For Selenium screenshots)
 
 ### 📜 Required Python Packages:
 The script requires the following dependencies:
