@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.2] - 2025-03-06
+### Added
+- Added "ns1.usssdomainseizure.com", "ns2.usssdomainseizure.com"
+
+---
+
 ## [2.0.1] - 2025-02-25
 ### Added
 - Added import platform to reduce false positive seizure notifications on initial check.
