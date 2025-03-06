@@ -109,7 +109,7 @@ ascii_banner = r"""
      _,-' ,'`-__; '--.
     (_/'~~      ''''(;                                                    
 
-[bold blue]FBI Watchdog v2.0.1 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
+[bold blue]FBI Watchdog v2.0.2 by [link=https://darkwebinformer.com]Dark Web Informer[/link][/bold blue]
 """
 
 console.print(Padding(f"[bold blue]{ascii_banner}[/bold blue]", (0, 0, 0, 4)))
