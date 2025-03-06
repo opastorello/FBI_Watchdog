@@ -552,7 +552,7 @@ def watch_dog():
                         console.print("")
 
                         seizure_capture = None
-                        if record_type == "NS" and any(ns in sorted_records for ns in ["ns1.fbi.seized.gov.", "ns2.fbi.seized.gov.", "jocelyn.ns.cloudflare.com.", "plato.ns.cloudflare.com."]):
+                        if record_type == "NS" and any(ns in sorted_records for ns in ["ns1.fbi.seized.gov.", "ns2.fbi.seized.gov.", "jocelyn.ns.cloudflare.com.", "plato.ns.cloudflare.com.", "ns1.usssdomainseizure.com", "ns2.usssdomainseizure.com"]):
                             console.print(Padding(f"→ Taking seizure screenshot for {domain} (FBI Seized NS Detected)", (0, 0, 0, 4)))
                             seizure_capture = capture_seizure_image(domain)
 
