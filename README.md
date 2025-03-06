@@ -44,7 +44,7 @@
 
 ## :pushpin: Features
 - :white_check_mark: **Real-time DNS Monitoring** – Detects changes in `A`, `AAAA`, `CNAME`, `MX`, `NS`, `SOA`, and `TXT` records.
-- :white_check_mark: **Seizure Detection** – Identifies law enforcement takeovers (`ns1.fbi.seized.gov, ns2.fbi.seized.gov, jocelyn.ns.cloudflare.com, and plato.ns.cloudflare.com`).
+- :white_check_mark: **Seizure Detection** – Identifies law enforcement takeovers (`ns1.fbi.seized.gov, ns2.fbi.seized.gov, jocelyn.ns.cloudflare.com, plato.ns.cloudflare.com, ns1.usssdomainseizure.com and ns2.usssdomainseizure.com`).
 - :white_check_mark: **Telegram & Discord Alerts** – Sends detailed notifications when a DNS change occurs or a domain is seized.
 - :white_check_mark: **Screenshot Capture** – Uses **Selenium** to take snapshots of affected sites.
 - :white_check_mark: **Rich CLI Output** – Uses **`rich`** for colored logs and better visibility.
