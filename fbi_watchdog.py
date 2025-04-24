@@ -114,15 +114,18 @@ ascii_banner = r"""
 
 console.print(Padding(f"[bold blue]{ascii_banner}[/bold blue]", (0, 0, 0, 4)))
 
-# Domain list to monitor for seizure banners and DNS changes
+# Load domains and onion sites
+domains = os.getenv("DOMAINS", "").split(",")
+onion_sites = os.getenv("ONION_SITES", "").split(",")
 
-domains = [
-    "example.com," "example1.com," "example2.com"
-]
+# Clean up lists by removing whitespace and empty entries
+domains = [domain.strip() for domain in domains if domain.strip()]
+onion_sites = [site.strip() for site in onion_sites if site.strip()]
 
-onion_sites = [
-     "dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion", "breached26tezcofqla4adzyn22notfqwcac7gpbrleg4usehljwkgqd.onion",
-]
+# Check if both lists are empty
+if not domains and not onion_sites:
+    console.print(Padding("[red]→ Missing environment variable! You did not set domains or onion sites.[/red]", (0, 0, 0, 4)))
+    exit(1)
 
 # DNS records that will be checked for changes
 dnsRecords = ["A", "AAAA", "CNAME", "MX", "NS", "SOA", "TXT"]
